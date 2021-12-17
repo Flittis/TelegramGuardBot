@@ -1,0 +1,37 @@
+import Config from './src/Config.js'
+
+/* Modules */
+
+import mongoose from 'mongoose'
+import { Telegraf } from 'telegraf'
+
+/* Controllers */
+
+import BotController from './src/Controller/BotController.js'
+import AdminMiddleware from './src/Middleware/AdminMiddleware.js'
+import LinksService from './src/Service/LinksService.js'
+
+/* Telegram Bot */
+
+const bot = new Telegraf(Config.BOT_TOKEN)
+
+bot.use(AdminMiddleware)
+
+bot.hears(LinksService.createRegExp(LinksService.links), BotController.LinkCheck)
+
+/* Starter */
+
+async function Start() {
+    try {
+        await mongoose.connect(`${Config.DB_URL}`, { useNewUrlParser: true, useUnifiedTopology: true })
+            .then(() => console.log(`DB Connected to ${Config.DB_URL.replace(/(mongodb\:\/\/).+\@(.+)\/.+/gi, '$1$2')}`));
+
+        bot.startPolling();
+
+        console.log(`Bot started`)
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+Start();
