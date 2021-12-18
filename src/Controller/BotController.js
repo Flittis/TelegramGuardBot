@@ -14,7 +14,7 @@ let GiveawayController = {
 
             msg.telegram.sendMessage(msg.chat.id, Config.PHRASES.LINK_NOT_ALLOWED)
                 .then(_msg => {
-                    setTimeout(() => msg.telegram.deleteMessage(msg.chat.id, _msg.message_id).catch(err => console.error(`Unable to delete ${_msg.message_id}`)), 3 * 1000)
+                    setTimeout(() => msg.telegram.deleteMessage(msg.chat.id, _msg.message_id).catch(err => console.error(`Unable to delete ${_msg.message_id}`)), 1 * 1000)
                 })
                 .catch(err => console.error(`Unable to send message`))
 
