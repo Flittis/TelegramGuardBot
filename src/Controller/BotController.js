@@ -1,36 +1,37 @@
 import Config from '../Config.js'
 
-import Log from '../Model/LogModel.js'
-import LinksService from '../Service/LinksService.js';
+import BotService from '../Service/BotService.js'
 
-let BotController = {
-    Message: async msg => {
-        if (msg.chat.id == Config.CHAT_ID) this.ChatMessage(msg);
+import ChatMessageController from './ChatMessageController.js'
+import PrivateMessageController from './PrivateMessageController.js'
 
-        
-    },
+class BotController {
+    constructor() {
+        BotService.ReadLinks()
+    }
 
-    ChatMessage: async msg => {
-        if (!msg.from.isAdmin && LinksService.createRegExp().exec(msg.message.text)) {
-            try {
-                msg.telegram.deleteMessage(msg.chat.id, msg.message.message_id)
-                    .catch(err => console.error(`Unable to delete ${msg.message.message_id}`))
-                msg.telegram.callApi('restrictChatMember', { chat_id: msg.chat.id, user_id: msg.from.id, until_date: (Date.now() + Config.BAN_PERIODS.LINK) / 1000 })
-                    .catch(err => console.error(`Unable to restrict ${msg.from.id}`))
+    Message = async msg => {
+        if (msg.chat.id == Config.CHAT_ID) return this.ChatMessage(msg)
+        if (msg.chat.type == 'private') return this.PrivateMessage(msg)
+    }
 
-                msg.telegram.sendMessage(msg.chat.id, Config.PHRASES.LINK_NOT_ALLOWED)
-                    .then(_msg => {
-                        setTimeout(() => msg.telegram.deleteMessage(msg.chat.id, _msg.message_id).catch(err => console.error(`Unable to delete ${_msg.message_id}`)), 1 * 1000)
-                    })
-                    .catch(err => console.error(`Unable to send message`))
+    ChatMessage = async msg => {
+        if (!msg.from.isAdmin && BotService.LinkRegular?.exec(msg.message.text)) return ChatMessageController.LinkMessage(msg)
 
-                let _log = new Log({ user_id: msg.from.id, username: msg.from.username || undefined, name: msg.from.first_name || undefined, chat_id: msg.chat.id, action: 'link', message: msg.message.text });
-                _log.save();
-            } catch (e) {
-                console.error(e);
-            }
+        let temp;
+
+        if (msg.from.isAdmin) {
+            if ((temp = Config.COMMANDS.MUTE_USER.exec(msg.message.text))) return ChatMessageController.MuteUser(msg)
         }
+    }
+
+    PrivateMessage = async msg => {
+        if (!msg.from.isAdmin) return;
+
+        let temp;
+
+        if ((temp = Config.COMMANDS.ADD_LINK.exec(msg.message.text))) return PrivateMessageController.AddLink(msg, temp)
     }
 }
 
-export default BotController;
+export default new BotController;
