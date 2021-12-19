@@ -9,7 +9,6 @@ import { Telegraf } from 'telegraf'
 
 import BotController from './src/Controller/BotController.js'
 import AdminMiddleware from './src/Middleware/AdminMiddleware.js'
-import LinksService from './src/Service/LinksService.js'
 
 /* Telegram Bot */
 
@@ -17,7 +16,7 @@ const bot = new Telegraf(Config.BOT_TOKEN)
 
 bot.use(AdminMiddleware)
 
-bot.hears(LinksService.createRegExp(LinksService.links), BotController.LinkCheck)
+bot.on('message', BotController.Message)
 
 /* Starter */
 
