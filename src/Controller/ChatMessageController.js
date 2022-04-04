@@ -9,12 +9,12 @@ class ChatMessageController {
             msg.telegram.callApi('restrictChatMember', { chat_id: msg.chat.id, user_id: msg.from.id, until_date: (Date.now() + Config.BAN_PERIODS.LINK) / 1000 })
                 .catch(err => console.error(`Unable to restrict ${msg.from.id}`, err))
 
-            msg.tempReply(Config.PHRASES.CANT_MUTE_USER);
+            msg.tempReply(Config.PHRASES.LINK_NOT_ALLOWED);
 
             let _log = new Log({ user_id: msg.from.id, username: msg.from.username || undefined, name: msg.from.first_name || undefined, chat_id: msg.chat.id, action: 'link', message: msg.message.text });
             _log.save();
         } catch (e) {
-            console.error(e);
+            console.error(e?.message || 'Unknown error');
         }
     }
 
@@ -37,7 +37,7 @@ class ChatMessageController {
                     console.error('Unable to restrict user', err)
                 })
         } catch (e) {
-            console.error(e);
+            console.error(e?.message || 'Unknown error');
         }
     }
 }

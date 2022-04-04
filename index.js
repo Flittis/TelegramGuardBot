@@ -18,6 +18,8 @@ bot.use(AdminMiddleware)
 
 bot.on('message', BotController.Message)
 
+bot.catch((error, ctx) => console.error(error, ctx))
+
 /* Starter */
 
 async function Start() {
@@ -32,5 +34,8 @@ async function Start() {
         console.error(e);
     }
 }
+
+process.once('SIGINT', () => bot.stop('SIGINT'))
+process.once('SIGTERM', () => bot.stop('SIGTERM'))
 
 Start();
